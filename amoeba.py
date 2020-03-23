@@ -9,25 +9,28 @@ def downhill_simplex(simplex, function, max_iterations, tol, alpha, beta, gamma)
     assert(alpha > 0)
     assert(0 < beta < 1)
     assert(gamma > 1)
+    assert(tol > 0)
+    assert(max_iterations > 0)
 
     v = np.apply_along_axis(function, axis=1, arr=simplex)
     iterations = 0
+    h = -1
+    l = 0
     for it in range(max_iterations):
         iterations = it
         if stop_criteria(v, tol):
             break
 
-        h = np.argmax(v)
-        l = np.argmin(v)
-        centroid = np.mean(
-            [p for i, p in enumerate(simplex) if i != h], axis=0
-        )
+        # Sort values and simplex
+        sorted_indexes = np.argsort(v)
+        v = v[sorted_indexes]
+        simplex = simplex[sorted_indexes]
+
+        centroid = np.mean(simplex[:h], axis=0)
         x_prime = reflection(alpha, centroid, simplex[h])
         y_prime = function(x_prime)
-
-        v_noh = np.array([p for i, p in enumerate(v) if i != h])
         is_y_prime_best = (
-            (y_prime > v_noh).sum() == v_noh.size
+            (y_prime > v[:h]).sum() == v[:h].size
         ).astype(np.int)
 
         if y_prime < v[l]:
@@ -46,10 +49,7 @@ def downhill_simplex(simplex, function, max_iterations, tol, alpha, beta, gamma)
             x_second = contraction(beta, centroid, simplex[h])
             y_second = function(x_second)
             if y_second > v[h]:
-                x_min = simplex[l]
-                simplex = np.apply_along_axis(
-                    lambda x: (x + x_min) / 2, axis=1, arr=simplex
-                )
+                simplex = shrink(simplex, l)
                 v = np.apply_along_axis(function, axis=1, arr=simplex)
             else:
                 simplex[h] = x_second
@@ -71,6 +71,13 @@ def expansion(gamma, centroid, point):
 
 def contraction(beta, centroid, point):
     return beta * point + (1 - beta) * centroid
+
+
+def shrink(simplex, l):
+    x_min = simplex[l]
+    return np.apply_along_axis(
+        lambda x: (x + x_min) / 2, axis=1, arr=simplex
+    )
 
 
 def stop_criteria(v, tol):
