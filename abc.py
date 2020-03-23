@@ -88,20 +88,9 @@ def abc_algorithm(n_food_sources, lower_bounds, upper_bounds, limit, max_iterati
 
     best_food_source = find_best(best_food_source, food_sources, function)
 
-    for index in range(n_food_sources):
-        food_source = new_food_source(food_sources, index)
-        if is_fit_better(food_sources[index], food_source, function):
-            food_sources[index] = food_source
-            trails[index] = 0
-        else:
-            trails[index] += 1
+    for _ in range(max_iterations):
 
-    best_food_source = find_best(best_food_source, food_sources, function)
-
-    probabilities = onlooker_probabilities(food_sources, function)
-
-    for index in range(n_food_sources):
-        if probability(probabilities[index]):
+        for index in range(n_food_sources):
             food_source = new_food_source(food_sources, index)
             if is_fit_better(food_sources[index], food_source, function):
                 food_sources[index] = food_source
@@ -109,17 +98,30 @@ def abc_algorithm(n_food_sources, lower_bounds, upper_bounds, limit, max_iterati
             else:
                 trails[index] += 1
 
-    best_food_source = find_best(best_food_source, food_sources, function)
+        best_food_source = find_best(best_food_source, food_sources, function)
 
-    food_sources = renew_food_sources(
-        food_sources, trails, limit, lower_bounds, upper_bounds)
+        probabilities = onlooker_probabilities(food_sources, function)
+
+        for index in range(n_food_sources):
+            if probability(probabilities[index]):
+                food_source = new_food_source(food_sources, index)
+                if is_fit_better(food_sources[index], food_source, function):
+                    food_sources[index] = food_source
+                    trails[index] = 0
+                else:
+                    trails[index] += 1
+
+        best_food_source = find_best(best_food_source, food_sources, function)
+
+        food_sources = renew_food_sources(
+            food_sources, trails, limit, lower_bounds, upper_bounds)
 
     return best_food_source
 
 
 class ListAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
-        values = [int(x)
+        values = [float(x)
                   for x in values.replace('[', '').replace(']', '').split(',')]
         setattr(namespace, self.dest, values)
 
