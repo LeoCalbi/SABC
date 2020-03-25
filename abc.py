@@ -1,10 +1,11 @@
 '''
-ABC algorithm
+Artificial Bee Colony algorithm
 '''
 
 
-import numpy as np
 import argparse
+
+import numpy as np
 
 from utils import *
 
@@ -37,8 +38,9 @@ def new_food_source(food_sources, index):
         np.delete(np.arange(n_food_sources), index)
     )
     food_source = np.array(food_sources[index], copy=True)
-    food_source[d] += np.random.uniform(-1, 1) * \
-        (food_source[d] - food_sources[new_index][d])
+    food_source[d] += np.random.uniform(-1, 1) * (
+        food_source[d] - food_sources[new_index][d]
+    )
     return food_source
 
 
@@ -97,26 +99,13 @@ def renew_food_sources(food_sources, trails, limit, lower_bounds, upper_bounds):
     n_food_sources, n_vars = food_sources.shape
     assert(n_food_sources == trails.size)
 
-    to_change = trails >= limit
-    random_idxs = np.random.choice(
-        np.arange(n_vars), n_food_sources
-    )
-    random_vars = np.random.random_sample(n_food_sources)
-
-    original_vars = np.take_along_axis(
-        food_sources, random_idxs.reshape(n_food_sources, 1), axis=1
-    )
-    lb = np.take(lower_bounds, random_idxs, axis=0)
-    ub = np.take(upper_bounds, random_idxs, axis=0)
-    vars_to_change = lb + random_vars * (ub - lb)
-    vars_to_change = np.where(to_change, vars_to_change, original_vars)
-    np.put_along_axis(
-        food_sources,
-        random_idxs.reshape(n_food_sources, 1),
-        vars_to_change.reshape(n_food_sources, 1),
-        axis=1
-    )
-
+    for i, trail in enumerate(trails):
+        if trail >= limit:
+            j = np.random.choice(np.arange(n_vars))
+            food_sources[i][j] = (
+                lower_bounds[j] + np.random.random_sample() *
+                (upper_bounds[j] - lower_bounds[j])
+            )
     return food_sources
 
 
@@ -183,7 +172,7 @@ def parse_args():
     '''
     Parse standard input arguments
     '''
-    parser = argparse.ArgumentParser(description='Artificial bee colony algorithm')
+    parser = argparse.ArgumentParser(description='Artificial Bee Colony algorithm')
     parser.add_argument(
         dest='n_food_sources', action='store', default=10,
         type=int, help='number of food sources'
@@ -197,11 +186,11 @@ def parse_args():
         help='upper bounds for each variable',
     )
     parser.add_argument(
-        dest='limit', action='store', default=50,
+        '-l', '--limit', action='store', default=50,
         type=int, help='trails limit'
     )
     parser.add_argument(
-        dest='max_iterations', action='store', default=1000,
+        '-i', '--max_iterations', action='store', default=1000,
         type=int, help='maximum number of iterations'
     )
     parser.add_argument(

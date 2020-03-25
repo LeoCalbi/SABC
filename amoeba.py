@@ -1,8 +1,13 @@
+'''
+Nelder-Mead algorithm
+'''
+
 
 import argparse
 
 import numpy as np
-from scipy.optimize import rosen
+
+from utils import *
 
 
 def downhill_simplex(simplex, function, max_iterations, tol, alpha, beta, gamma):
@@ -107,13 +112,6 @@ def simplex_coordinates(x_zero):
     return np.array(x)
 
 
-class ListAction(argparse.Action):
-    def __call__(self, parser, namespace, values, option_string=None):
-        values = [float(x.strip())
-                  for x in values.replace('[', '').replace(']', '').split(',')]
-        setattr(namespace, self.dest, values)
-
-
 def parse_args():
     '''
     Parse standard input arguments
@@ -122,44 +120,32 @@ def parse_args():
         description='Nelder-Mead downhill simplex algorithm'
     )
     parser.add_argument(
-        dest='initial_point',
-        action=ListAction,
+        dest='initial_point', action=ListAction,
         help='initial point used to compute the simplex'
     ),
     parser.add_argument(
-        '--max_iterations',
-        action='store',
-        default=1000,
-        type=int,
-        help='maximum number of iterations'
+        '-i', '--max_iterations', action='store', default=1000,
+        type=int, help='maximum number of iterations'
     ),
     parser.add_argument(
-        '--tol',
-        action='store',
-        default=1e-5,
-        type=float,
-        help='tolerance for the stopping criteria'
+        '-t', '--tol', action='store', default=1e-5,
+        type=float, help='tolerance for the stopping criteria'
     ),
     parser.add_argument(
-        '--alpha',
-        action='store',
-        default=1,
-        type=float,
-        help='coefficient for reflection'
+        '-a', '--alpha', action='store', default=1,
+        type=float, help='coefficient for reflection'
     ),
     parser.add_argument(
-        '--beta',
-        action='store',
-        default=0.5,
-        type=float,
-        help='coefficient for contraction'
+        '-b', '--beta', action='store', default=0.5,
+        type=float, help='coefficient for contraction'
     ),
     parser.add_argument(
-        '--gamma',
-        action='store',
-        default=2,
-        type=float,
-        help='coefficient for expansion'
+        '-g', '--gamma', action='store', default=2,
+        type=float, help='coefficient for expansion'
+    )
+    parser.add_argument(
+        '-f', '--function', action='store', default='rosenbrock',
+        type=str, choices=FUNCTIONS.keys(), help='benchmark function'
     )
     args = parser.parse_args()
     return args
@@ -168,12 +154,13 @@ def parse_args():
 def main():
     args = parse_args()
     simplex = simplex_coordinates(args.initial_point)
-    print(simplex)
+    print(f'Initial simplex: {simplex}')
     result, iterations = downhill_simplex(
-        simplex, rosen, args.max_iterations, args.tol, args.alpha, args.beta, args.gamma
+        simplex, FUNCTIONS[args.function], args.max_iterations,
+        args.tol, args.alpha, args.beta, args.gamma
     )
-    print(result)
-    print(iterations)
+    print(f'Result: {result}')
+    print(f'Iterations: {iterations}')
 
 
 if __name__ == "__main__":
