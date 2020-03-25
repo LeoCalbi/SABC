@@ -10,18 +10,21 @@ import numpy as np
 from utils import *
 
 
-def downhill_simplex(simplex, function, max_iterations, tol, alpha, beta, gamma):
+def downhill_simplex(simplex, function, nm_iterations, tol, alpha, beta, gamma):
+    '''
+    Nelder-Mead algorithm
+    '''
     assert(alpha > 0)
     assert(0 < beta < 1)
     assert(gamma > 1)
     assert(tol > 0)
-    assert(max_iterations > 0)
+    assert(nm_iterations > 0)
 
     v = np.apply_along_axis(function, axis=1, arr=simplex)
     iterations = 0
     h = -1
     l = 0
-    for it in range(max_iterations):
+    for it in range(nm_iterations):
         iterations = it
         if stop_criteria(v, tol):
             break
@@ -67,18 +70,30 @@ def downhill_simplex(simplex, function, max_iterations, tol, alpha, beta, gamma)
 
 
 def reflection(alpha, centroid, point):
+    '''
+    Reflection geometric operation
+    '''
     return (1 + alpha) * centroid - alpha * point
 
 
 def expansion(gamma, centroid, point):
+    '''
+    Expansion geometric operation
+    '''
     return (1 + gamma) * point - gamma * centroid
 
 
 def contraction(beta, centroid, point):
+    '''
+    Contraction geometric operation
+    '''
     return beta * point + (1 - beta) * centroid
 
 
 def shrink(simplex, l):
+    '''
+    Shrink geometric operation
+    '''
     x_min = simplex[l]
     return np.apply_along_axis(
         lambda x: (x + x_min) / 2, axis=1, arr=simplex
@@ -86,6 +101,9 @@ def shrink(simplex, l):
 
 
 def stop_criteria(v, tol):
+    '''
+    Check if the standard deviation of the values is within the given tolerance
+    '''
     mu = np.mean(v)
     n = len(v)
     return np.sqrt(
@@ -100,8 +118,8 @@ def simplex_coordinates(x_zero):
     Generate a simplex starting from the given initial point.
     Implementation based upon Matlab's fminsearch routine.
     '''
-    x = [np.array(x_zero)]
-    n = len(x_zero)
+    x = [x_zero]
+    n = x_zero.size
     b = np.eye(n)
     for i in range(n):
         h = (
@@ -112,19 +130,19 @@ def simplex_coordinates(x_zero):
     return np.array(x)
 
 
-def parse_args():
+def amoeba_cli_parser():
     '''
-    Parse standard input arguments
+    Create a standard input arguments parser
     '''
     parser = argparse.ArgumentParser(
-        description='Nelder-Mead downhill simplex algorithm'
+        prog='amoeba', description='Nelder-Mead downhill simplex algorithm'
     )
     parser.add_argument(
         dest='initial_point', action=ListAction,
         help='initial point used to compute the simplex'
     ),
     parser.add_argument(
-        '-i', '--max_iterations', action='store', default=1000,
+        '-i', '--nm_iterations', action='store', default=1000,
         type=int, help='maximum number of iterations'
     ),
     parser.add_argument(
@@ -147,16 +165,16 @@ def parse_args():
         '-f', '--function', action='store', default='rosenbrock',
         type=str, choices=FUNCTIONS.keys(), help='benchmark function'
     )
-    args = parser.parse_args()
-    return args
+    return parser
 
 
 def main():
-    args = parse_args()
-    simplex = simplex_coordinates(args.initial_point)
+    parser = amoeba_cli_parser()
+    args = parser.parse_args()
+    simplex = simplex_coordinates(np.array(args.initial_point))
     print(f'Initial simplex: {simplex}')
     result, iterations = downhill_simplex(
-        simplex, FUNCTIONS[args.function], args.max_iterations,
+        simplex, FUNCTIONS[args.function], args.nm_iterations,
         args.tol, args.alpha, args.beta, args.gamma
     )
     print(f'Result: {result}')

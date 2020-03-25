@@ -92,7 +92,7 @@ def probability(p):
     return p > np.random.random_sample()
 
 
-def renew_food_sources(food_sources, trails, limit, lower_bounds, upper_bounds):
+def renew_food_sources(food_sources, trails, limit, lower_bounds, upper_bounds, *args):
     '''
     Scout bees stage
     '''
@@ -127,17 +127,19 @@ def move_food_sources(food_sources, trails, function, probabilities=None):
     return food_sources, trails
 
 
-def abc_algorithm(n_food_sources, lower_bounds, upper_bounds, limit, max_iterations, function):
+def abc_algorithm(n_food_sources, lower_bounds, upper_bounds, limit,
+                  abc_iterations, function, *args):
     '''
     Main ABC algorithm
     '''
+    args = (function,) + args
     lower_bounds = np.array(lower_bounds)
     upper_bounds = np.array(upper_bounds)
     assert(lower_bounds.size == upper_bounds.size)
     assert(lower_bounds.size > 0)
     assert(n_food_sources > 0)
     assert(limit > 0)
-    assert(max_iterations > 0)
+    assert(abc_iterations > 0)
 
     # Initialization
     food_sources = gen_pop(n_food_sources, lower_bounds, upper_bounds)
@@ -145,7 +147,7 @@ def abc_algorithm(n_food_sources, lower_bounds, upper_bounds, limit, max_iterati
     best_food_source = find_best(food_sources[0], food_sources, function)
 
     # Main iterations
-    for _ in range(max_iterations):
+    for _ in range(abc_iterations):
 
         # Employed bees stage
         food_sources, trails = move_food_sources(
@@ -162,17 +164,17 @@ def abc_algorithm(n_food_sources, lower_bounds, upper_bounds, limit, max_iterati
 
         # Scout bees stage
         food_sources = renew_food_sources(
-            food_sources, trails, limit, lower_bounds, upper_bounds
+            food_sources, trails, limit, lower_bounds, upper_bounds, *args
         )
 
     return best_food_source
 
 
-def parse_args():
+def abc_cli_parser():
     '''
-    Parse standard input arguments
+    Create a standard input arguments parser
     '''
-    parser = argparse.ArgumentParser(description='Artificial Bee Colony algorithm')
+    parser = argparse.ArgumentParser(prog='abc', description='Artificial Bee Colony algorithm')
     parser.add_argument(
         dest='n_food_sources', action='store', default=10,
         type=int, help='number of food sources'
@@ -190,24 +192,24 @@ def parse_args():
         type=int, help='trails limit'
     )
     parser.add_argument(
-        '-i', '--max_iterations', action='store', default=1000,
+        '-i', '--abc_iterations', action='store', default=1000,
         type=int, help='maximum number of iterations'
     )
     parser.add_argument(
         '-f', '--function', action='store', default='rosenbrock',
         type=str, choices=FUNCTIONS.keys(), help='benchmark function'
     )
-    args = parser.parse_args()
-    return args
+    return parser
 
 
 def main():
-    args = parse_args()
+    parser = abc_cli_parser()
+    args = parser.parse_args()
     minimum = abc_algorithm(
         args.n_food_sources, args.lower_bounds, args.upper_bounds,
-        args.limit, args.max_iterations, FUNCTIONS[args.function]
+        args.limit, args.abc_iterations, FUNCTIONS[args.function]
     )
-    print(minimum)
+    print(f'Result: {minimum}')
 
 
 if __name__ == '__main__':
