@@ -21,11 +21,11 @@ def downhill_simplex(simplex, function, nm_iterations, tol, alpha, beta, gamma):
     assert(nm_iterations > 0)
 
     v = np.apply_along_axis(function, axis=1, arr=simplex)
-    iterations = 0
+    iterations = 1
     h = -1
     l = 0
     for it in range(nm_iterations):
-        iterations = it
+        iterations = it + 1
         if stop_criteria(v, tol):
             break
 
@@ -178,7 +178,7 @@ def main():
         args.tol, args.alpha, args.beta, args.gamma
     )
     print(f'Result: {result}')
-    print(f'Iterations: {iterations}')
+    print(f'Iterations: {iterations}/{args.nm_iterations}')
 
 
 if __name__ == "__main__":

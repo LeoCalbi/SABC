@@ -58,6 +58,10 @@ def sabc_cli_parser():
         '--abc_iterations', action='store', default=1000,
         type=int, help='maximum number of iterations'
     ),
+    abc_group.add_argument(
+        '-c', '--abc_stop', action='store', default=20,
+        type=int, help='maximum number of non-changing best value before stopping'
+    ),
     amoeba_group.add_argument(
         '--nm_iterations', action='store', default=1000,
         type=int, help='maximum number of iterations'
@@ -89,12 +93,13 @@ def main():
     parser = sabc_cli_parser()
     args = parser.parse_args()
     abeec.renew_food_sources = renew_food_sources
-    minimum = abc_algorithm(
+    result, iterations = abc_algorithm(
         args.n_food_sources, args.lower_bounds, args.upper_bounds,
-        args.limit, args.abc_iterations, FUNCTIONS[args.function],
+        args.limit, args.abc_stop, args.abc_iterations, FUNCTIONS[args.function],
         args.nm_iterations, args.tol, args.alpha, args.beta, args.gamma
     )
-    print(f'Result: {minimum}')
+    print(f'Result: {result}')
+    print(f'Iterations: {iterations}/{args.abc_iterations}')
 
 
 if __name__ == "__main__":

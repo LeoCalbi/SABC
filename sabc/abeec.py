@@ -128,7 +128,7 @@ def move_food_sources(food_sources, trails, function, probabilities=None):
 
 
 def abc_algorithm(n_food_sources, lower_bounds, upper_bounds, limit,
-                  abc_iterations, function, *args):
+                  abc_stop, abc_iterations, function, *args):
     '''
     Main ABC algorithm
     '''
@@ -145,15 +145,21 @@ def abc_algorithm(n_food_sources, lower_bounds, upper_bounds, limit,
     food_sources = gen_pop(n_food_sources, lower_bounds, upper_bounds)
     trails = np.zeros(n_food_sources)
     best_food_source = find_best(food_sources[0], food_sources, function)
+    prev_best = best_food_source
 
     # Main iterations
-    for _ in range(abc_iterations):
+    best_equal = 0
+    iterations = 1
+    for it in range(abc_iterations):
+        iterations = it + 1
 
         # Employed bees stage
         food_sources, trails = move_food_sources(
             food_sources, trails, function
         )
         best_food_source = find_best(best_food_source, food_sources, function)
+        if not np.array_equal(prev_best, best_food_source):
+            best_equal = 0
 
         # Onlooker bees stage
         probabilities = onlooker_probabilities(food_sources, function)
@@ -161,13 +167,17 @@ def abc_algorithm(n_food_sources, lower_bounds, upper_bounds, limit,
             food_sources, trails, function, probabilities
         )
         best_food_source = find_best(best_food_source, food_sources, function)
+        best_equal = best_equal + 1 if np.array_equal(prev_best, best_food_source) else 0
+        if best_equal == abc_stop:
+            break
+        prev_best = best_food_source
 
         # Scout bees stage
         food_sources = renew_food_sources(
             food_sources, trails, limit, lower_bounds, upper_bounds, *args
         )
 
-    return best_food_source
+    return best_food_source, iterations
 
 
 def abc_cli_parser():
@@ -196,6 +206,10 @@ def abc_cli_parser():
         type=int, help='maximum number of iterations'
     )
     parser.add_argument(
+        '-c', '--abc_stop', action='store', default=20,
+        type=int, help='maximum number of non-changing best value before stopping'
+    )
+    parser.add_argument(
         '-f', '--function', action='store', default='rosenbrock',
         type=str, choices=FUNCTIONS.keys(), help='benchmark function'
     )
@@ -205,11 +219,12 @@ def abc_cli_parser():
 def main():
     parser = abc_cli_parser()
     args = parser.parse_args()
-    minimum = abc_algorithm(
+    result, iterations = abc_algorithm(
         args.n_food_sources, args.lower_bounds, args.upper_bounds,
-        args.limit, args.abc_iterations, FUNCTIONS[args.function]
+        args.limit, args.abc_stop, args.abc_iterations, FUNCTIONS[args.function]
     )
-    print(f'Result: {minimum}')
+    print(f'Result: {result}')
+    print(f'Iterations: {iterations}/{args.abc_iterations}')
 
 
 if __name__ == '__main__':
