@@ -5,6 +5,8 @@ Utility functions
 
 import argparse
 
+import numpy as np
+
 
 class ListAction(argparse.Action):
     def __call__(self, parser, namespace, values, option_string=None):
@@ -13,7 +15,7 @@ class ListAction(argparse.Action):
         setattr(namespace, self.dest, values)
 
 
-def rosenbrock_function(x):
+def rosenbrock(x):
     '''
     Compute the generalized Rosenbrock function.
     In 2D, minimum 0 at (1, 1) 
@@ -35,7 +37,16 @@ def sixhump(x):
     )
 
 
+def rastrigin(x):
+    '''
+    Compute the Rastrigin function.
+    Minimum 0 at (0, ..., 0) 
+    '''
+    return (10 * x.size) + np.sum((x ** 2) - 10 * np.cos(2 * np.pi * x))
+
+
 FUNCTIONS = {
-    'rosenbrock': rosenbrock_function,
-    'sixhump': sixhump
+    'rosenbrock': rosenbrock,
+    'sixhump': sixhump,
+    'rastrigin': rastrigin
 }
