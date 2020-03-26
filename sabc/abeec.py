@@ -184,7 +184,7 @@ def abc_cli_parser():
     '''
     Create a standard input arguments parser
     '''
-    parser = argparse.ArgumentParser(prog='abc', description='Artificial Bee Colony algorithm')
+    parser = argparse.ArgumentParser(prog='abeec', description='Artificial Bee Colony algorithm')
     parser.add_argument(
         dest='n_food_sources', action='store', default=10,
         type=int, help='number of food sources'

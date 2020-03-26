@@ -34,7 +34,7 @@ def sabc_cli_parser():
     Create a standard input arguments parser
     '''
     parser = argparse.ArgumentParser(
-        prog='sabc', description='Simplex Artificial Bee Colony algorithm'
+        prog='sabeec', description='Simplex Artificial Bee Colony algorithm'
     )
     abc_group = parser.add_argument_group('ABC params')
     amoeba_group = parser.add_argument_group('Nelder-Mead params')
