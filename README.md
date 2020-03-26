@@ -1,9 +1,12 @@
 # SABC
 
-This repository contains the implementation of the following methods:
-- **Artificial Bee Colony**
-- **Nelder-Mead**
-- **Simplex Artificial Bee Colony**
+This repository contains the implementation of the following optimization methods:
+- **Artificial Bee Colony** [[1]](#1)
+- **Nelder-Mead** [[2]](#2)
+- **Simplex Artificial Bee Colony** [[3]](#3)
+
+The implemented methods are supposed to work for unconstrained non-linear problems.\
+You can check the convergence properties of each of the algorithms in their corresponding reference paper.
 
 ## Installation
 
@@ -69,7 +72,7 @@ python amoeba.py '[10, 10]' -i 1000 -f 'rosenbrock'
 
 _SABC_
 ```bash
-python sabeec.py 100 '[-10, -10]' '[10, 10]' -c 50 -l 20 --nm-iterations 100 --abc-iterations 1000 -f 'rosenbrock'
+python sabeec.py 100 '[-10, -10]' '[10, 10]' -c 50 -l 20 --nm_iterations 100 --abc_iterations 1000 -f 'rosenbrock'
 ```
 
 ## References
@@ -87,6 +90,6 @@ _Xufang Zhao, Ximing Liang, Long Wen (2018)_.\
 **The Artificial Bee Colony Algorithm Improved with Simplex Method**.\
 School of Science, Beijing University of Civil Engineering and Architecture.
 - <a id="4">[4]</a>
-_Fuchang Gao, Lixing Han_.\
+_Fuchang Gao, Lixing Han (2010)_.\
 **Implementing the Nelder-Mead simplex algorithm with adaptive parameters**.\
-Springer Science+Business Media, LLC 2010
+Springer Science+Business Media, LLC 2010.
