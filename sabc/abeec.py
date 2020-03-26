@@ -6,6 +6,7 @@ Artificial Bee Colony algorithm
 import argparse
 
 import numpy as np
+np.random.seed(84)  # nopep8
 
 from utils import *
 
@@ -28,7 +29,7 @@ def fitness(food_source, function):
     return 1 / (1 + value) if value >= 0 else 1 + abs(value)
 
 
-def new_food_source(food_sources, index):
+def new_food_source(food_sources, lower_bounds, upper_bounds, index):
     '''
     Employed/onlooker bees new food source discovery
     '''
@@ -41,6 +42,13 @@ def new_food_source(food_sources, index):
     food_source[d] += np.random.uniform(-1, 1) * (
         food_source[d] - food_sources[new_index][d]
     )
+
+    # Shift onto boundaries
+    if food_source[d] > upper_bounds[d]:
+        food_source[d] = upper_bounds[d]
+    elif food_source[d] < lower_bounds[d]:
+        food_source[d] = lower_bounds[d]
+
     return food_source
 
 
@@ -109,7 +117,8 @@ def renew_food_sources(food_sources, trails, limit, lower_bounds, upper_bounds, 
     return food_sources
 
 
-def move_food_sources(food_sources, trails, function, probabilities=None):
+def move_food_sources(food_sources, lower_bounds, upper_bounds,
+                      trails, function, probabilities=None):
     '''
     Compute the new food sources and trails values for
     the employed and onlooker bees
@@ -118,7 +127,7 @@ def move_food_sources(food_sources, trails, function, probabilities=None):
     for i in range(n_food_sources):
         if (probabilities is None or
                 (probabilities is not None and probability(probabilities[i]))):
-            food_source = new_food_source(food_sources, i)
+            food_source = new_food_source(food_sources, lower_bounds, upper_bounds, i)
             if is_fit_better(food_sources[i], food_source, function):
                 food_sources[i] = food_source
                 trails[i] = 0
@@ -155,7 +164,7 @@ def abc_algorithm(n_food_sources, lower_bounds, upper_bounds, limit,
 
         # Employed bees stage
         food_sources, trails = move_food_sources(
-            food_sources, trails, function
+            food_sources, lower_bounds, upper_bounds, trails, function
         )
         best_food_source = find_best(best_food_source, food_sources, function)
         if not np.array_equal(prev_best, best_food_source):
@@ -164,7 +173,7 @@ def abc_algorithm(n_food_sources, lower_bounds, upper_bounds, limit,
         # Onlooker bees stage
         probabilities = onlooker_probabilities(food_sources, function)
         food_sources, trails = move_food_sources(
-            food_sources, trails, function, probabilities
+            food_sources, lower_bounds, upper_bounds, trails, function, probabilities
         )
         best_food_source = find_best(best_food_source, food_sources, function)
         best_equal = best_equal + 1 if np.array_equal(prev_best, best_food_source) else 0
@@ -198,7 +207,7 @@ def abc_cli_parser():
         help='upper bounds for each variable',
     )
     parser.add_argument(
-        '-l', '--limit', action='store', default=50,
+        '-l', '--limit', action='store', default=20,
         type=int, help='trails limit'
     )
     parser.add_argument(
@@ -206,7 +215,7 @@ def abc_cli_parser():
         type=int, help='maximum number of iterations'
     )
     parser.add_argument(
-        '-c', '--abc_stop', action='store', default=20,
+        '-c', '--abc_stop', action='store', default=50,
         type=int, help='maximum number of non-changing best value before stopping'
     )
     parser.add_argument(

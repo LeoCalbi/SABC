@@ -45,8 +45,20 @@ def rastrigin(x):
     return (10 * x.size) + np.sum((x ** 2) - 10 * np.cos(2 * np.pi * x))
 
 
+def ackley(x):
+    '''
+    Compute the Ackley function.
+    Minimum 0 at (0, ..., 0)
+    '''
+    return (
+        (20 - 20 * np.exp(-0.2 * np.sqrt((1/x.size) * np.sum(x**2)))
+         + np.exp(1) - np.exp((1 / x.size) * np.sum(np.cos(2 * np.pi * x))))
+    )
+
+
 FUNCTIONS = {
     'rosenbrock': rosenbrock,
     'sixhump': sixhump,
-    'rastrigin': rastrigin
+    'rastrigin': rastrigin,
+    'ackley': ackley
 }

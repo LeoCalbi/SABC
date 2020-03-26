@@ -51,7 +51,7 @@ def sabc_cli_parser():
         help='upper bounds for each variable',
     )
     abc_group.add_argument(
-        '-l', '--limit', action='store', default=50,
+        '-l', '--limit', action='store', default=20,
         type=int, help='trails limit'
     )
     abc_group.add_argument(
@@ -59,7 +59,7 @@ def sabc_cli_parser():
         type=int, help='maximum number of iterations'
     ),
     abc_group.add_argument(
-        '-c', '--abc_stop', action='store', default=20,
+        '-c', '--abc_stop', action='store', default=50,
         type=int, help='maximum number of non-changing best value before stopping'
     ),
     amoeba_group.add_argument(
