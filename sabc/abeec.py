@@ -4,11 +4,11 @@ Artificial Bee Colony algorithm
 
 
 import argparse
+import time
 
 import numpy as np
-np.random.seed(84)  # nopep8
 
-from utils import *
+from utils import ListAction, FUNCTIONS, print_statistics
 
 
 def gen_pop(n_food_sources, lower_bounds, upper_bounds):
@@ -72,12 +72,19 @@ def best_fit(old_food_source, food_source, function):
 
 def find_best(current_best, food_sources, function):
     '''
-    Return the best food source, based on fitnesses
+    Return the best food source or the current best, based on fitnesses
+    '''
+    return best_fit(find_best_food_source(food_sources, function), current_best, function)
+
+
+def find_best_food_source(food_sources, function):
+    '''
+    Return the current best food source, based on fitnesses
     '''
     best_idx = np.argmax(np.apply_along_axis(
         lambda x: fitness(x, function), axis=1, arr=food_sources
     ))
-    return best_fit(food_sources[best_idx], current_best, function)
+    return food_sources[best_idx]
 
 
 def onlooker_probabilities(food_sources, function):
@@ -100,7 +107,7 @@ def probability(p):
     return p > np.random.random_sample()
 
 
-def renew_food_sources(food_sources, trails, limit, lower_bounds, upper_bounds, *args):
+def renew_food_sources(food_sources, trails, limit, lower_bounds, upper_bounds, function, *args):
     '''
     Scout bees stage
     '''
@@ -109,12 +116,19 @@ def renew_food_sources(food_sources, trails, limit, lower_bounds, upper_bounds, 
 
     for i, trail in enumerate(trails):
         if trail >= limit:
-            j = np.random.choice(np.arange(n_vars))
-            food_sources[i][j] = (
-                lower_bounds[j] + np.random.random_sample() *
-                (upper_bounds[j] - lower_bounds[j])
-            )
+            food_sources[i] = renew_food_source(food_sources[i], lower_bounds, upper_bounds)
+            trails[i] = 0
     return food_sources
+
+
+def renew_food_source(food_source, lower_bounds, upper_bounds):
+    n_vars = food_source.size
+    j = np.random.choice(np.arange(n_vars))
+    food_source[j] = (
+        lower_bounds[j] + np.random.random_sample() *
+        (upper_bounds[j] - lower_bounds[j])
+    )
+    return food_source
 
 
 def move_food_sources(food_sources, lower_bounds, upper_bounds,
@@ -141,7 +155,6 @@ def abc_algorithm(n_food_sources, lower_bounds, upper_bounds, limit,
     '''
     Main ABC algorithm
     '''
-    args = (function,) + args
     lower_bounds = np.array(lower_bounds)
     upper_bounds = np.array(upper_bounds)
     assert(lower_bounds.size == upper_bounds.size)
@@ -153,8 +166,7 @@ def abc_algorithm(n_food_sources, lower_bounds, upper_bounds, limit,
     # Initialization
     food_sources = gen_pop(n_food_sources, lower_bounds, upper_bounds)
     trails = np.zeros(n_food_sources)
-    best_food_source = find_best(food_sources[0], food_sources, function)
-    prev_best = best_food_source
+    best_food_source = find_best_food_source(food_sources, function)
 
     # Main iterations
     best_equal = 0
@@ -166,26 +178,29 @@ def abc_algorithm(n_food_sources, lower_bounds, upper_bounds, limit,
         food_sources, trails = move_food_sources(
             food_sources, lower_bounds, upper_bounds, trails, function
         )
+        prev_best = best_food_source
         best_food_source = find_best(best_food_source, food_sources, function)
-        if not np.array_equal(prev_best, best_food_source):
-            best_equal = 0
+        best_equal = best_equal + 1/3 if np.array_equal(prev_best, best_food_source) else 0
 
         # Onlooker bees stage
         probabilities = onlooker_probabilities(food_sources, function)
         food_sources, trails = move_food_sources(
             food_sources, lower_bounds, upper_bounds, trails, function, probabilities
         )
-        best_food_source = find_best(best_food_source, food_sources, function)
-        best_equal = best_equal + 1 if np.array_equal(prev_best, best_food_source) else 0
-        if best_equal == abc_stop:
-            break
         prev_best = best_food_source
+        best_food_source = find_best(best_food_source, food_sources, function)
+        best_equal = best_equal + 1/3 if np.array_equal(prev_best, best_food_source) else 0
 
         # Scout bees stage
         food_sources = renew_food_sources(
-            food_sources, trails, limit, lower_bounds, upper_bounds, *args
+            food_sources, trails, limit, lower_bounds, upper_bounds, function, *args
         )
+        prev_best = best_food_source
+        best_food_source = find_best(best_food_source, food_sources, function)
+        best_equal = best_equal + 1/3 if np.array_equal(prev_best, best_food_source) else 0
 
+        if best_equal >= abc_stop:
+            break
     return best_food_source, iterations
 
 
@@ -222,18 +237,39 @@ def abc_cli_parser():
         '-f', '--function', action='store', default='rosenbrock',
         type=str, choices=FUNCTIONS.keys(), help='benchmark function'
     )
+    parser.add_argument(
+        '-r', '--runtimes', action='store', default=1,
+        type=int, help='number of executions'
+    )
     return parser
 
 
 def main():
     parser = abc_cli_parser()
     args = parser.parse_args()
-    result, iterations = abc_algorithm(
-        args.n_food_sources, args.lower_bounds, args.upper_bounds,
-        args.limit, args.abc_stop, args.abc_iterations, FUNCTIONS[args.function]
-    )
-    print(f'Result: {result}')
-    print(f'Iterations: {iterations}/{args.abc_iterations}')
+    results = []
+    mins = []
+    iterations = []
+    times = []
+    for _ in range(args.runtimes):
+        start_time = time.time()
+        result, n_iteration = abc_algorithm(
+            args.n_food_sources, args.lower_bounds, args.upper_bounds,
+            args.limit, args.abc_stop, args.abc_iterations, FUNCTIONS[args.function]
+        )
+        times.append(time.time() - start_time)
+        results.append(result)
+        iterations.append(n_iteration)
+        mins.append(FUNCTIONS[args.function](result))
+    if args.runtimes == 1:
+        print(f'Result: {results[0]}')
+        print(f'Minimum: {mins[0]}')
+        print(f'Iterations: {iterations[0]}/{args.nm_iterations}')
+        print(f'Execution time: {times[0]} seconds')
+    else:
+        print_statistics(results, mins, iterations, args.abc_iterations, FUNCTIONS[args.function])
+        print(f'Mean execution time: {np.mean(times)} seconds')
+        print(f'Total execution time: {np.sum(times)} seconds')
 
 
 if __name__ == '__main__':

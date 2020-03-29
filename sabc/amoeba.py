@@ -8,6 +8,7 @@ import argparse
 import numpy as np
 
 from utils import *
+import time
 
 
 def downhill_simplex(simplex, function, nm_iterations, tol, alpha, beta, gamma):
@@ -142,7 +143,7 @@ def amoeba_cli_parser():
         help='initial point used to compute the simplex'
     ),
     parser.add_argument(
-        '-i', '--nm_iterations', action='store', default=1000,
+        '-i', '--nm_iterations', action='store', default=3000,
         type=int, help='maximum number of iterations'
     ),
     parser.add_argument(
@@ -171,14 +172,18 @@ def amoeba_cli_parser():
 def main():
     parser = amoeba_cli_parser()
     args = parser.parse_args()
+    start_time = time.time()
     simplex = simplex_coordinates(np.array(args.initial_point))
     print(f'Initial simplex: {simplex}')
     result, iterations = downhill_simplex(
         simplex, FUNCTIONS[args.function], args.nm_iterations,
         args.tol, args.alpha, args.beta, args.gamma
     )
+    end_time = time.time() - start_time
     print(f'Result: {result}')
+    print(f'Minimum: {FUNCTIONS[args.function](result)}')
     print(f'Iterations: {iterations}/{args.nm_iterations}')
+    print(f'Execution time: {end_time} seconds')
 
 
 if __name__ == "__main__":
