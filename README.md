@@ -69,11 +69,11 @@ except the `initial_point` of Nelder-Mead, since it is computed by the `ABC` pro
 
 The benchmark functions you can choose are implemented in the `utils.py` module:
 
-- `ackley` <img src="https://render.githubusercontent.com/render/math?math=f(x_1 \cdots x_n) = -20 exp(-0.2 \sqrt{\frac{1}{n} \sum_{i=1}^n x_i^2}) - exp(\frac{1}{n} \sum_{i=1}^n cos(2\pi x_i)) + 20 + e">
-- `rastrigin` <img src="https://render.githubusercontent.com/render/math?math=f(x_1 \cdots x_n) = 10n + \sum_{i=1}^n (x_i^2 -10cos(2\pi x_i))">
-- `rosenbrock` <img src="https://render.githubusercontent.com/render/math?math=f(x_1 \cdots x_n) = \sum_{i=1}^{n-1} (100(x_i^2 - x_{i+1})^2 + (1-x_i)^2)">
+- `ackley`: <img src="https://render.githubusercontent.com/render/math?math=f(x_1 \cdots x_n) = -20 exp(-0.2 \sqrt{\frac{1}{n} \sum_{i=1}^n x_i^2}) - exp(\frac{1}{n} \sum_{i=1}^n cos(2\pi x_i)) + 20 + e">
+- `rastrigin`: <img src="https://render.githubusercontent.com/render/math?math=f(x_1 \cdots x_n) = 10n + \sum_{i=1}^n (x_i^2 -10cos(2\pi x_i))">
+- `rosenbrock`: <img src="https://render.githubusercontent.com/render/math?math=f(x_1 \cdots x_n) = \sum_{i=1}^{n-1} (100(x_i^2 - x_{i+1})^2 + (1-x_i)^2)">
 - `schaffer`: <img src="https://render.githubusercontent.com/render/math?math=f(x_1 \cdots x_n) = \sum_{i=1}^{n-1} (x_i^2+x_{i+1}^2)^{0.25} \cdot \left[ \sin^2(50\cdot(x_i^2+x_{i+1}^2)^{0.10}) + 1.0 \right]">
-- `sixhump` <img src="https://render.githubusercontent.com/render/math?math=$(x_1,x_2)=(4 - 2.1x^2_1+\frac{1}{3}x^4_1) * (x_1^2 +x_1x_2 -4+4x^2_2) * (x_2^2)">
+- `sixhump`: <img src="https://render.githubusercontent.com/render/math?math=$f(x_1,x_2)=(4 - 2.1x^2_1+\frac{1}{3}x^4_1) * (x_1^2 +x_1x_2 -4+4x^2_2) * (x_2^2)">
 
 ## Use cases
 
