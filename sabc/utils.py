@@ -83,9 +83,24 @@ def ackley(x):
     )
 
 
+def schaffer(x):
+    '''
+    Compute the Schaffer function.
+    Minimum 0 at (0, ..., 0), in range [-100, 100]
+    '''
+    y = 0
+    for i in range(len(x) - 1):
+        y += (
+            (((x[i] ** 2) + (x[i + 1] ** 2)) ** 0.25) *
+            (((np.sin(50 * ((x[i] ** 2) + (x[i + 1] ** 2)) ** 0.10)) ** 2) + 1)
+        )
+    return y
+
+
 FUNCTIONS = {
-    'rosenbrock': rosenbrock,
-    'sixhump': sixhump,
+    'ackley': ackley,
     'rastrigin': rastrigin,
-    'ackley': ackley
+    'rosenbrock': rosenbrock,
+    'schaffer': schaffer,
+    'sixhump': sixhump
 }

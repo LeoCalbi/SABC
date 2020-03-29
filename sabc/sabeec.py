@@ -69,7 +69,7 @@ def sabc_cli_parser():
         type=int, help='maximum number of non-changing best value before stopping'
     ),
     amoeba_group.add_argument(
-        '--nm_iterations', action='store', default=3000,
+        '--nm_iterations', action='store', default=1000,
         type=int, help='maximum number of iterations'
     ),
     amoeba_group.add_argument(

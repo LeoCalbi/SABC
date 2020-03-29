@@ -143,7 +143,7 @@ def amoeba_cli_parser():
         help='initial point used to compute the simplex'
     ),
     parser.add_argument(
-        '-i', '--nm_iterations', action='store', default=3000,
+        '-i', '--nm_iterations', action='store', default=1000,
         type=int, help='maximum number of iterations'
     ),
     parser.add_argument(

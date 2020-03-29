@@ -215,7 +215,7 @@ def abc_cli_parser():
     '''
     parser = argparse.ArgumentParser(prog='abeec', description='Artificial Bee Colony algorithm')
     parser.add_argument(
-        dest='n_food_sources', action='store', default=10,
+        dest='n_food_sources', action='store', default=100,
         type=int, help='number of food sources'
     )
     parser.add_argument(
@@ -231,11 +231,11 @@ def abc_cli_parser():
         type=int, help='trails limit'
     )
     parser.add_argument(
-        '-i', '--abc_iterations', action='store', default=1000,
+        '-i', '--abc_iterations', action='store', default=3000,
         type=int, help='maximum number of iterations'
     )
     parser.add_argument(
-        '-c', '--abc_stop', action='store', default=50,
+        '-c', '--abc_stop', action='store', default=100,
         type=int, help='maximum number of non-changing best value before stopping'
     )
     parser.add_argument(
