@@ -4,11 +4,11 @@ Nelder-Mead algorithm
 
 
 import argparse
+import time
 
 import numpy as np
 
-from utils import *
-import time
+from utils import ListAction, FUNCTIONS
 
 
 def downhill_simplex(simplex, function, nm_iterations, tol, alpha, beta, gamma):

@@ -70,16 +70,16 @@ def best_fit(old_food_source, food_source, function):
     )
 
 
-def find_best(current_best, food_sources, function):
+def find_current_best(current_best, food_sources, function):
     '''
     Return the best food source or the current best, based on fitnesses
     '''
-    return best_fit(find_best_food_source(food_sources, function), current_best, function)
+    return best_fit(find_best(food_sources, function), current_best, function)
 
 
-def find_best_food_source(food_sources, function):
+def find_best(food_sources, function):
     '''
-    Return the current best food source, based on fitnesses
+    Return the best food source, based on fitnesses
     '''
     best_idx = np.argmax(np.apply_along_axis(
         lambda x: fitness(x, function), axis=1, arr=food_sources
@@ -122,6 +122,9 @@ def renew_food_sources(food_sources, trails, limit, lower_bounds, upper_bounds, 
 
 
 def renew_food_source(food_source, lower_bounds, upper_bounds):
+    '''
+    Compute a new food source for the scout bees stage
+    '''
     n_vars = food_source.size
     j = np.random.choice(np.arange(n_vars))
     food_source[j] = (
@@ -166,7 +169,7 @@ def abc_algorithm(n_food_sources, lower_bounds, upper_bounds, limit,
     # Initialization
     food_sources = gen_pop(n_food_sources, lower_bounds, upper_bounds)
     trails = np.zeros(n_food_sources)
-    best_food_source = find_best_food_source(food_sources, function)
+    best_food_source = find_best(food_sources, function)
 
     # Main iterations
     best_equal = 0
@@ -179,8 +182,8 @@ def abc_algorithm(n_food_sources, lower_bounds, upper_bounds, limit,
             food_sources, lower_bounds, upper_bounds, trails, function
         )
         prev_best = best_food_source
-        best_food_source = find_best(best_food_source, food_sources, function)
-        best_equal = best_equal + 1/3 if np.array_equal(prev_best, best_food_source) else 0
+        best_food_source = find_current_best(best_food_source, food_sources, function)
+        best_equal = best_equal + 1 / 3 if np.array_equal(prev_best, best_food_source) else 0
 
         # Onlooker bees stage
         probabilities = onlooker_probabilities(food_sources, function)
@@ -188,19 +191,21 @@ def abc_algorithm(n_food_sources, lower_bounds, upper_bounds, limit,
             food_sources, lower_bounds, upper_bounds, trails, function, probabilities
         )
         prev_best = best_food_source
-        best_food_source = find_best(best_food_source, food_sources, function)
-        best_equal = best_equal + 1/3 if np.array_equal(prev_best, best_food_source) else 0
+        best_food_source = find_current_best(best_food_source, food_sources, function)
+        best_equal = best_equal + 1 / 3 if np.array_equal(prev_best, best_food_source) else 0
 
         # Scout bees stage
         food_sources = renew_food_sources(
             food_sources, trails, limit, lower_bounds, upper_bounds, function, *args
         )
         prev_best = best_food_source
-        best_food_source = find_best(best_food_source, food_sources, function)
-        best_equal = best_equal + 1/3 if np.array_equal(prev_best, best_food_source) else 0
+        best_food_source = find_current_best(best_food_source, food_sources, function)
+        best_equal = best_equal + 1 / 3 if np.array_equal(prev_best, best_food_source) else 0
 
+        # Stop criteria
         if best_equal >= abc_stop:
             break
+
     return best_food_source, iterations
 
 
@@ -261,6 +266,8 @@ def main():
         results.append(result)
         iterations.append(n_iteration)
         mins.append(FUNCTIONS[args.function](result))
+
+    # Print results
     if args.runtimes == 1:
         print(f'Result: {results[0]}')
         print(f'Minimum: {mins[0]}')

@@ -28,9 +28,10 @@ def renew_food_sources(food_sources, trails, limit, lower_bounds, upper_bounds, 
                 simplex, function, *args
             )
             trails[i] = 0
-            if not np.array_equal(food_sources[i], abeec.find_best_food_source(food_sources, function)):
+            if not np.array_equal(food_sources[i], abeec.find_best(food_sources, function)):
                 food_sources[i] = abeec.renew_food_source(
-                    food_sources[i], lower_bounds, upper_bounds)
+                    food_sources[i], lower_bounds, upper_bounds
+                )
     return food_sources
 
 
@@ -118,6 +119,7 @@ def main():
         iterations.append(n_iteration)
         mins.append(FUNCTIONS[args.function](result))
 
+    # Print results
     if args.runtimes == 1:
         print(f'Result: {results[0]}')
         print(f'Minimum: {mins[0]}')
