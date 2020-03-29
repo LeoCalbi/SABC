@@ -9,6 +9,11 @@ This repository contains the implementation of the following optimization method
 The implemented methods are supposed to work for unconstrained non-linear minimization problems.\
 You can check the convergence properties of each of the algorithms in their corresponding reference paper.
 
+We slightly changed two conditions w.r.t the original `SABC` algorithm:
+
+1. Stopping criteria: The `ABC` algorithm will stop if it reaches the maximum number of iterations or when a solution does not get improved after a given number of iterations
+2. Scout bees stage: In the `SABC` implementation, the scout bees stage looks for a new solution when the `Nelder-Mead` algorithm does not improve the best solution among the current ones
+
 ## Installation
 
 This project was written and tested with `Python 3.7`, so make sure that you have it installed on your system.\
@@ -36,37 +41,39 @@ Here, `<alg>` could be one of `abeec`, `amoeba` or `sabeec`.
 
 ### ABC Parameters
 
-- `n_food_sources`: Number of food source to find inside the given bounds, represents also the number of employed, onlooker bees. (default 100)
-- `lower_bounds`: List of numbers representing the lower bounds of each variable in the search space, must have the same size as `upper_bounds` (they define the dimension of the search space).
-- `upper_bounds`: List of numbers representing the upper bounds of each variable in the search space.
-- `limit`: Upper limit of trail before abandoning a food source. (default 20)
-- `abc_iterations`: Maximum number of iterations for the ABC algorithm. (default 3000)
-- `abc_stop`: Maximum number of non-changing best value before stopping the algorithm. (default 100)
-- `function`: Function on with to execute the search. (default 'rosenbrock')
-- `runtimes`: Number of executions for statistics purposes. (default 1)
+- `n_food_sources`: Number of food sources to use inside the given bounds, which represents also the number of employed/onlooker bees (defaults to 100)
+- `lower_bounds`: List of numbers representing the lower bounds of each variable in the search space, which must have the same size as `upper_bounds` (they define the dimension of the search space)
+- `upper_bounds`: List of numbers representing the upper bounds of each variable in the search space
+- `limit`: Trails upper limit before abandoning a food source (defaults to 20)
+- `abc_iterations`: Maximum number of iterations for the `ABC` algorithm (defaults to 3000)
+- `abc_stop`: Maximum number of non-changing best value before stopping the algorithm (defaults to 100)
+- `function`: Function on with to execute the search (defaults to `rosenbrock`)
+- `runtimes`: Number of executions, used for statistics purposes (defaults to 1)
 
 ### Nelder-Mead Parameters
 
 - `initial_point`: Initial point used to compute the simplex.
-- `nm_iterations`: Maximum number of iterations for the Nelder-Mead algorithm. (default 3000)
-- `tol`: Tolerance for the stopping criteria of the algorithm. (default $10^{-5}$)
-- `alpha`: Coefficient for the reflection operation. (default 1)
-- `beta`: Coefficient for the contraction operation. (default 0.5)
-- `gamma`: Coefficient for the expansion operation. (default 2)
-- `function`: Function on with to execute the search. (default 'rosenbrock')
+- `nm_iterations`: Maximum number of iterations for the `Nelder-Mead` algorithm (defaults to 1000)
+- `tol`: Tolerance for the stopping criteria of the algorithm (defaults to $10^{-5}$)
+- `alpha`: Coefficient for the reflection operation (defaults to 1)
+- `beta`: Coefficient for the contraction operation (defaults to 0.5)
+- `gamma`: Coefficient for the expansion operation (defaults to 2)
+- `function`: Function on with to execute the search (defaults to `rosenbrock`)
 
 ### SABC Parameters
 
-As a combination of the two algorithms takes all the above parameters, except `initial_point` of Nelder-Mead because it's computed by the ABC procedure.
+As a combination of the two algorithms it takes all of the parameters described above,
+except the `initial_point` of Nelder-Mead, since it is computed by the `ABC` procedure.
 
 ## Implemented Functions
 
 The benchmark functions you can choose are implemented in the `utils.py` module:
 
-- `ackley` $f(x_1 \cdots x_n) = -20 exp(-0.2 \sqrt{\frac{1}{n} \sum_{i=1}^n x_i^2}) - exp(\frac{1}{n} \sum_{i=1}^n cos(2\pi x_i)) + 20 + e$
-- `rastrigin` $f(x_1 \cdots x_n) = 10n + \sum_{i=1}^n (x_i^2 -10cos(2\pi x_i))$
-- `rosenbrock` $f(x_1 \cdots x_n) = \sum_{i=1}^{n-1} (100(x_i^2 - x_{i+1})^2 + (1-x_i)^2)$
-- `sixhump` $f(x_1,x_2)=(4 - 2.1x^2_1+\frac{1}{3}x^4_1) * (x_1^2 +x_1x_2 -4+4x^2_2) * (x_2^2)$
+- `ackley` <img src="https://render.githubusercontent.com/render/math?math=f(x_1 \cdots x_n) = -20 exp(-0.2 \sqrt{\frac{1}{n} \sum_{i=1}^n x_i^2}) - exp(\frac{1}{n} \sum_{i=1}^n cos(2\pi x_i)) + 20 + e">
+- `rastrigin` <img src="https://render.githubusercontent.com/render/math?math=f(x_1 \cdots x_n) = 10n + \sum_{i=1}^n (x_i^2 -10cos(2\pi x_i))">
+- `rosenbrock` <img src="https://render.githubusercontent.com/render/math?math=f(x_1 \cdots x_n) = \sum_{i=1}^{n-1} (100(x_i^2 - x_{i+1})^2 + (1-x_i)^2)">
+- `schaffer`: <img src="https://render.githubusercontent.com/render/math?math=f(x_1 \cdots x_n) = \sum_{i=1}^{n-1} (x_i^2+x_{i+1}^2)^{0.25} \cdot \left[ \sin^2(50\cdot(x_i^2+x_{i+1}^2)^{0.10}) + 1.0 \right]">
+- `sixhump` <img src="https://render.githubusercontent.com/render/math?math=$(x_1,x_2)=(4 - 2.1x^2_1+\frac{1}{3}x^4_1) * (x_1^2 +x_1x_2 -4+4x^2_2) * (x_2^2)">
 
 ## Use cases
 
